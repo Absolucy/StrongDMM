@@ -12,13 +12,12 @@ import (
 )
 
 // SaveTGM writes DmmData in TGM format to a file with the provided path.
-func (d DmmData) SaveTGM(path string) {
+func (d DmmData) SaveTGM(path string) error {
 	log.Print("saving dmm data in [TGM] format...")
 
 	f, err := os.Create(path)
 	if err != nil {
-		log.Printf("unable to save as [TGM] [%s]: %v", d, err)
-		return
+		return fmt.Errorf("creating %s: %w", path, err)
 	}
 	defer f.Close()
 
@@ -57,10 +56,11 @@ func (d DmmData) SaveTGM(path string) {
 	}
 
 	if err = w.Flush(); err != nil {
-		log.Printf("unable to write to [%s]: %v", path, err)
+		return fmt.Errorf("writing %s: %w", path, err)
 	}
 
 	log.Printf("[%s] saved in [TGM] format to: %s", d, path)
+	return nil
 }
 
 func toTGMStr(key Key, content Prefabs, lineBreak string) string {

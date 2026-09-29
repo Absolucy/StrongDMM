@@ -34,6 +34,23 @@ func (p *PaneMap) panelStatusLayoutStatus() (layout w.Layout) {
 
 	layout = append(layout, w.Tooltip(w.Text("Tile coordinates of the mouse")))
 
+	if p.layer != nil && !p.canvasState.HoverOutOfBounds() {
+		t := p.canvasState.HoveredTile()
+		if owner := p.layer.Owner(t); owner != nil {
+			if p.layer.IsFrozen(t) {
+				layout = append(layout,
+					w.TextFrame("overlap, read-only"),
+					w.Tooltip(w.Text("Two automapper templates cover this tile. The game adds both templates' objects here, so edits can't be saved back.")),
+				)
+			} else {
+				layout = append(layout,
+					w.TextFrame(owner.Name),
+					w.Tooltip(w.Text("Automapper template this tile belongs to")),
+				)
+			}
+		}
+	}
+
 	if isQuickToolToggled() && !tools.Selected().AltBehaviour() {
 		if hoveredInstance := p.canvasState.HoveredInstance(); hoveredInstance != nil {
 			layout = append(layout, w.TextFrame(hoveredInstance.Prefab().Path()))

@@ -16,6 +16,7 @@ import (
 	"sdmm/internal/util"
 
 	"sdmm/internal/app/command"
+	"sdmm/internal/dmapi/automap"
 	"sdmm/internal/dmapi/dmmap"
 
 	"github.com/rs/zerolog/log"
@@ -99,13 +100,13 @@ func (w *WsArea) OpenCreateMap() {
 	w.addWorkspace(ws)
 }
 
-func (w *WsArea) OpenMap(dmm *dmmap.Dmm, ws *workspace.Workspace) bool {
+func (w *WsArea) OpenMap(dmm *dmmap.Dmm, layer *automap.Layer, ws *workspace.Workspace) bool {
 	if wsMap, ok := w.findMapWorkspace(dmm.Path); ok {
 		wsMap.SetTriggerFocus(true)
 		return false
 	}
 
-	wsCnt := wsmap.New(w.app, dmm)
+	wsCnt := wsmap.New(w.app, dmm, layer)
 	if ws != nil {
 		ws.SetContent(wsCnt)
 	} else {
@@ -190,8 +191,16 @@ func (w *WsArea) closeWorkspacesGentlyV(wsToClose []*workspace.Workspace, callba
 	}
 
 	dType.ActionYes = func() {
+		allSaved := true
 		for _, ws := range unsavedWorkspaces {
-			ws.Save()
+			allSaved = ws.Save() && allSaved
+		}
+		// a failed save already showed its error, closing now would throw the edits away
+		if !allSaved {
+			if callback != nil {
+				callback(false)
+			}
+			return
 		}
 		w.closeWorkspaces(wsToClose)
 		if callback != nil {
@@ -236,7 +245,12 @@ func (w *WsArea) closeWorkspaceGentlyV(ws *workspace.Workspace, callback func(cl
 
 	dType := makeSaveSingleWorkspaceDialogType(ws)
 	dType.ActionYes = func() {
-		ws.Save()
+		if !ws.Save() {
+			if callback != nil {
+				callback(false)
+			}
+			return
+		}
 		w.closeWorkspace(ws)
 		if callback != nil {
 			callback(true)

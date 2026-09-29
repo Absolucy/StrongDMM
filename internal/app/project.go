@@ -17,6 +17,7 @@ import (
 	w "sdmm/internal/imguiext/widget"
 	"sdmm/internal/util/slice"
 
+	"sdmm/internal/dmapi/automap"
 	"sdmm/internal/dmapi/dmenv"
 	"sdmm/internal/dmapi/dmicon"
 	"sdmm/internal/dmapi/dmmap"
@@ -227,7 +228,23 @@ func (a *app) loadMap(path string, workspace *workspace.Workspace) {
 	}
 
 	dmm, unknownPrefabs := dmmap.New(a.loadedEnvironment, data, a.backupMap(path))
-	if a.layout.WsArea.OpenMap(dmm, workspace) {
+
+	// has to happen before the map is opened, so the undo history starts from the stamped state
+	layer, err := automap.Load(a.loadedEnvironment, dmm)
+	if err != nil {
+		log.Print("unable to load automapper templates:", err)
+		dialog.Open(dialog.TypeInformation{
+			Title:       "Automapper templates not loaded",
+			Information: fmt.Sprintf("The map opens without its automapper templates:\n - %s", err),
+		})
+	}
+	if layer != nil {
+		for _, warning := range layer.Warnings {
+			log.Print("automapper:", warning)
+		}
+	}
+
+	if a.layout.WsArea.OpenMap(dmm, layer, workspace) {
 		a.layout.Prefabs.Sync()
 
 		// TODO: processing for unknown prefabs

@@ -11,6 +11,7 @@ import (
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/tilemenu"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/tools"
 	"sdmm/internal/app/ui/shortcut"
+	"sdmm/internal/dmapi/automap"
 	"sdmm/internal/dmapi/dm"
 	"sdmm/internal/dmapi/dmenv"
 	"sdmm/internal/dmapi/dmmap"
@@ -76,6 +77,8 @@ type PaneMap struct {
 	app App
 
 	dmm *dmmap.Dmm
+	// nil when the project has no automapper
+	layer *automap.Layer
 
 	shortcuts shortcut.Shortcuts
 
@@ -138,6 +141,16 @@ func (p *PaneMap) Dmm() *dmmap.Dmm {
 	return p.dmm
 }
 
+func (p *PaneMap) Layer() *automap.Layer {
+	return p.layer
+}
+
+// ShowAutomapPanel opens the settings panel with its Automapper section expanded.
+func (p *PaneMap) ShowAutomapPanel() {
+	p.showSettings = true
+	p.pSettings.ExpandAutomap()
+}
+
 func (p *PaneMap) Focused() bool {
 	return p.focused
 }
@@ -162,10 +175,11 @@ func (p *PaneMap) SetShortcutsVisible(visible bool) {
 	p.shortcuts.SetVisible(visible)
 }
 
-func New(app App, dmm *dmmap.Dmm) *PaneMap {
+func New(app App, dmm *dmmap.Dmm, layer *automap.Layer) *PaneMap {
 	p := &PaneMap{
-		app: app,
-		dmm: dmm,
+		app:   app,
+		dmm:   dmm,
+		layer: layer,
 	}
 
 	p.activeLevel = 1 // Every map has at least 1 z-level, so we point to it.
@@ -176,7 +190,11 @@ func New(app App, dmm *dmmap.Dmm) *PaneMap {
 	p.tileMenu = tilemenu.New(app, p.editor)
 
 	p.pQuickEdit = pquickedit.New(app, p.editor)
-	p.pSettings = psettings.New(app, p.editor)
+	p.pSettings = psettings.New(app, p.editor, layer)
+	// the panel lives behind the settings gear, which is too easy to miss when there's something in it
+	if layer != nil && len(layer.Templates) > 0 {
+		p.ShowAutomapPanel()
+	}
 
 	p.canvas = canvas.New()
 	p.canvasState = canvas.NewState(dmm.MaxX, dmm.MaxY, dmmap.WorldIconSize)

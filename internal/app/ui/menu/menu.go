@@ -44,11 +44,13 @@ type app interface {
 
 	// View
 	DoAreaBorders()
+	DoAutomapRendering()
 	DoMultiZRendering()
 	DoMirrorCanvasCamera()
 
 	// Window
 	DoResetLayout()
+	DoOpenAutomapPanel()
 
 	// Help
 	DoOpenChangelog()
@@ -72,12 +74,14 @@ type app interface {
 	HasLoadedEnvironment() bool
 
 	HasActiveMap() bool
+	HasActiveAutomapMap() bool
 
 	PathsFilter() *dm.PathsFilter
 	CommandStorage() *command.Storage
 	Clipboard() *dmmclip.Clipboard
 
 	AreaBordersRendering() bool
+	AutomapRendering() bool
 	MultiZRendering() bool
 	MirrorCanvasCamera() bool
 }
@@ -228,6 +232,9 @@ func (m *Menu) Process() {
 			w.MenuItem("Area Borders", m.app.DoAreaBorders).
 				IconEmpty().
 				Selected(m.app.AreaBordersRendering()),
+			w.MenuItem("Automapper Templates", m.app.DoAutomapRendering).
+				IconEmpty().
+				Selected(m.app.AutomapRendering()),
 			w.MenuItem("Multi-Z Rendering", m.app.DoMultiZRendering).
 				IconEmpty().
 				Selected(m.app.MultiZRendering()).
@@ -240,6 +247,9 @@ func (m *Menu) Process() {
 		w.Menu("Window", w.Layout{
 			w.MenuItem("Reset Layout", m.app.DoResetLayout).Shortcut("F5").
 				Icon(icon.WindowRestore),
+			w.MenuItem("Automapper Templates", m.app.DoOpenAutomapPanel).
+				IconEmpty().
+				Enabled(m.app.HasActiveAutomapMap()),
 		}),
 
 		w.Menu("Help", w.Layout{

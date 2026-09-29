@@ -3,6 +3,7 @@ module sdmm
 go 1.24.0
 
 require (
+	github.com/BurntSushi/toml v1.6.0
 	github.com/SpaiR/imgui-go v1.12.1-0.20220214190844-a0bad21e1c5d
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a

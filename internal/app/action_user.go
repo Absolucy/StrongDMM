@@ -227,6 +227,14 @@ func (a *app) DoResetLayout() {
 	a.resetLayout()
 }
 
+// DoOpenAutomapPanel opens the active map's settings panel on its Automapper section.
+func (a *app) DoOpenAutomapPanel() {
+	log.Print("open automap panel")
+	if ws, ok := a.activeWsMap(); ok {
+		ws.Map().ShowAutomapPanel()
+	}
+}
+
 // DoOpenChangelog opens "changelog" workspace.
 func (a *app) DoOpenChangelog() {
 	log.Print("open changelog")
@@ -319,6 +327,12 @@ func (a *app) DoSearch() {
 func (a *app) DoAreaBorders() {
 	pmap.AreaBordersRendering = !pmap.AreaBordersRendering
 	log.Print("do area borders:", pmap.AreaBordersRendering)
+}
+
+// DoAutomapRendering toggles automapper template outlines.
+func (a *app) DoAutomapRendering() {
+	pmap.AutomapRendering = !pmap.AutomapRendering
+	log.Print("do automap rendering:", pmap.AutomapRendering)
 }
 
 // DoMultiZRendering toggles multi-z rendering.

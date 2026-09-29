@@ -32,6 +32,12 @@ func (p *Panel) DropSessionMapSize() {
 
 func (p *Panel) showMapSize() {
 	if imgui.CollapsingHeader("Map Size") {
+		// template footprints are fixed coordinates, and resize undo only knows about tiles
+		if p.layer != nil {
+			p.warningText("Resizing is off for maps in an automapper project, templates are pinned to fixed coordinates.")
+			return
+		}
+
 		if p.sessionMapSize == nil {
 			p.sessionMapSize = &sessionMapSize{
 				maxX: int32(p.editor.Dmm().MaxX),

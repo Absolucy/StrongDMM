@@ -131,6 +131,12 @@ func (a *app) HasActiveMap() bool {
 	return ok
 }
 
+// HasActiveAutomapMap returns true if the active map belongs to a project that uses the automapper.
+func (a *app) HasActiveAutomapMap() bool {
+	ws, ok := a.activeWsMap()
+	return ok && ws.Map().Layer() != nil
+}
+
 // UpdateTitle updates title in the application system window.
 // The title depends on current open environment and workspace.
 func (a *app) UpdateTitle() {
@@ -219,6 +225,11 @@ func (a *app) SyncVarEditor() {
 // AreaBordersRendering returns true if an area borders rendering enabled.
 func (a *app) AreaBordersRendering() bool {
 	return pmap.AreaBordersRendering
+}
+
+// AutomapRendering returns true if automapper template outlines are drawn.
+func (a *app) AutomapRendering() bool {
+	return pmap.AutomapRendering
 }
 
 // MultiZRendering returns true if a multi-z rendering enabled.

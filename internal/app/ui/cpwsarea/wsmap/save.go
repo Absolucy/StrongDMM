@@ -3,6 +3,7 @@ package wsmap
 import (
 	"sdmm/internal/app/prefs"
 	"sdmm/internal/dmapi/dmmsave"
+	"sdmm/internal/util"
 
 	"github.com/rs/zerolog/log"
 )
@@ -22,10 +23,22 @@ func (ws *WsMap) Save() bool {
 		saveFormat = dmmsave.FormatDM
 	}
 
-	dmmsave.Save(ws.app.LoadedEnvironment(), ws.paneMap.Dmm(), dmmsave.Config{
+	cfg := dmmsave.Config{
 		Format:            saveFormat,
 		SanitizeVariables: editorPrefs.SanitizeVariables,
-	})
+	}
+
+	var err error
+	if layer := ws.paneMap.Layer(); layer != nil {
+		err = layer.Save(ws.app.LoadedEnvironment(), ws.paneMap.Dmm(), cfg)
+	} else {
+		err = dmmsave.Save(ws.app.LoadedEnvironment(), ws.paneMap.Dmm(), cfg)
+	}
+	if err != nil {
+		log.Print("unable to save the map:", err)
+		util.ShowErrorDialog("Unable to save the map: " + err.Error())
+		return false
+	}
 
 	ws.app.CommandStorage().ForceBalance(ws.CommandStackId())
 	return true

@@ -18,6 +18,7 @@ func (p *PaneMap) processCanvasOverlay() {
 	p.processCanvasOverlayTools()
 	p.processCanvasOverlayFlick()
 	p.processCanvasOverlayAreasZones()
+	p.processCanvasOverlayAutomap()
 }
 
 func (p *PaneMap) processCanvasOverlayTools() {

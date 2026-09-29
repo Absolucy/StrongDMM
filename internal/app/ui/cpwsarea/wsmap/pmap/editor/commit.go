@@ -22,6 +22,12 @@ func (e *Editor) CommitMapSizeChange(oldMaxX, oldMaxY, oldMaxZ int) {
 	}))
 }
 
+// CommitTemplateChange pushes an automapper ownership change. Those only move tiles between
+// footprints and never touch tile contents, so there's nothing for the snapshot to diff.
+func (e *Editor) CommitTemplateChange(name string, undo, redo func()) {
+	e.app.CommandStorage().Push(command.Make(name, undo, redo))
+}
+
 func (e *Editor) onMapSizeChange(maxZ int) {
 	// Ensure we are on the visible level.
 	if e.pMap.ActiveLevel() > maxZ {

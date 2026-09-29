@@ -7,6 +7,7 @@ import (
 	"sdmm/internal/app/prefs"
 	"sdmm/internal/app/ui/cpwsarea/workspace"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap"
+	"sdmm/internal/dmapi/automap"
 	"sdmm/internal/dmapi/dmenv"
 	"sdmm/internal/dmapi/dmmap"
 
@@ -30,10 +31,10 @@ type WsMap struct {
 	paneMap *pmap.PaneMap
 }
 
-func New(app App, dmm *dmmap.Dmm) *WsMap {
+func New(app App, dmm *dmmap.Dmm, layer *automap.Layer) *WsMap {
 	return &WsMap{
 		app:     app,
-		paneMap: pmap.New(app, dmm),
+		paneMap: pmap.New(app, dmm, layer),
 	}
 }
 

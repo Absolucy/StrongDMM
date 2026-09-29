@@ -37,5 +37,8 @@ func (ws *WsCreateMap) save(newPath string) {
 		}
 	}
 
-	data.Save()
+	if err := data.Save(); err != nil {
+		log.Print("unable to save new map:", err)
+		util.ShowErrorDialog("Unable to save the map: " + err.Error())
+	}
 }
