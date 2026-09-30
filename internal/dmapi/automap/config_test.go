@@ -1,6 +1,9 @@
 package automap
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,6 +56,21 @@ trait_name = "Station"`
 
 	_, err = setCoordinates(sampleConfig, "metastation", [3]int{1, 2, 3})
 	assert.Error(t, err, "a prefix of a real name isn't a match")
+}
+
+// git's autocrlf hands Windows users CRLF configs
+func TestConfigEdit_KeepsCRLF(t *testing.T) {
+	crlf := func(s string) string { return strings.ReplaceAll(s, "\n", "\r\n") }
+	cfgPath := filepath.Join(t.TempDir(), "automapper_config.toml")
+	require.NoError(t, os.WriteFile(cfgPath, []byte(crlf(sampleConfig)), 0o644))
+
+	cfg := &Config{Path: cfgPath}
+	require.NoError(t, cfg.SetCoordinates("metastation_cryo", [3]int{1, 2, 3}))
+
+	got, err := os.ReadFile(cfgPath)
+	require.NoError(t, err)
+	want := strings.Replace(sampleConfig, "coordinates = [133, 182, 1]", "coordinates = [1, 2, 3]", 1)
+	assert.Equal(t, crlf(want), string(got))
 }
 
 func TestAppendEntry(t *testing.T) {

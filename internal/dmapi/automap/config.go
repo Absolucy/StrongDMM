@@ -201,9 +201,14 @@ func (c *Config) edit(change func(string) (string, error)) error {
 	if err != nil {
 		return fmt.Errorf("reading %s: %w", c.Path, err)
 	}
-	text, err := change(string(raw))
+	// autocrlf checkouts are CRLF, and the edits (plus the regex's $) only speak \n
+	crlf := strings.Contains(string(raw), "\r\n")
+	text, err := change(strings.ReplaceAll(string(raw), "\r\n", "\n"))
 	if err != nil {
 		return err
+	}
+	if crlf {
+		text = strings.ReplaceAll(text, "\n", "\r\n")
 	}
 	if err = os.WriteFile(c.Path, []byte(text), 0o644); err != nil {
 		return fmt.Errorf("writing %s: %w", c.Path, err)
