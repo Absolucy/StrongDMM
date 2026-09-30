@@ -106,7 +106,7 @@ func (l *Layer) saveTemplate(dme *dmenv.Dme, live *dmmap.Dmm, t *Template, sanit
 			Name:        t.Name,
 			MapFiles:    []string{filepath.Base(t.path)},
 			Directory:   t.Directory,
-			RequiredMap: live.Name,
+			RequiredMap: l.cfg.requiredMapOf(live),
 			Coordinates: coordinates[:],
 			TraitName:   t.Trait,
 		})

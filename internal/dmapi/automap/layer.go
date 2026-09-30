@@ -68,7 +68,7 @@ func Load(dme *dmenv.Dme, dmm *dmmap.Dmm) (*Layer, error) {
 	l := &Layer{cfg: cfg, base: &base}
 
 	for _, entry := range cfg.Entries {
-		if !strings.EqualFold(entry.RequiredMap, dmm.Name) {
+		if !entry.wants(dmm) {
 			continue
 		}
 		t, err := l.loadTemplate(dme, dmm, entry)

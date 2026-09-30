@@ -28,23 +28,33 @@ type testProject struct {
 }
 
 type testTemplate struct {
-	name   string
-	coords string // "x, y, z"
-	tiles  []string
+	name        string
+	coords      string // "x, y, z"
+	tiles       []string
+	requiredMap string // defaults to "station.dmm"
 }
 
 func newTestProject(t *testing.T, templates ...testTemplate) *testProject {
+	return newTestProjectAt(t, "station.dmm", templates...)
+}
+
+// newTestProjectAt puts the station map at stationRel (slash-separated, relative to the repo root).
+func newTestProjectAt(t *testing.T, stationRel string, templates ...testTemplate) *testProject {
 	root := t.TempDir()
-	p := &testProject{root: root, dme: testEnv(root), station: filepath.Join(root, "station.dmm")}
+	p := &testProject{root: root, dme: testEnv(root), station: filepath.Join(root, filepath.FromSlash(stationRel))}
 
 	writeTGM(t, p.station, repeat("/obj/pipe,\n/turf/floor,\n/area/hall", 5))
 
 	config := "# test config\n"
 	for _, tmpl := range templates {
+		requiredMap := tmpl.requiredMap
+		if requiredMap == "" {
+			requiredMap = "station.dmm"
+		}
 		writeTGM(t, filepath.Join(root, filepath.FromSlash(testTemplatesDir), tmpl.name+".dmm"), tmpl.tiles)
 		config += fmt.Sprintf(
-			"\n# %s\n[templates.%s]\nmap_files = [\"%s.dmm\"]\ndirectory = \"%s\"\nrequired_map = \"station.dmm\"\ncoordinates = [%s]\ntrait_name = \"Station\"\n",
-			tmpl.name, tmpl.name, tmpl.name, testTemplatesDir, tmpl.coords,
+			"\n# %s\n[templates.%s]\nmap_files = [\"%s.dmm\"]\ndirectory = \"%s\"\nrequired_map = \"%s\"\ncoordinates = [%s]\ntrait_name = \"Station\"\n",
+			tmpl.name, tmpl.name, tmpl.name, testTemplatesDir, requiredMap, tmpl.coords,
 		)
 	}
 	writeFile(t, filepath.Join(root, "_maps", "test", "automapper", "automapper_config.toml"), config)
@@ -180,6 +190,18 @@ func TestLoad(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLoad_FullPathRequiredMap(t *testing.T) {
+	_, layer := newTestProjectAt(t, "_maps/map_files/station/station.dmm",
+		testTemplate{name: "ours", coords: "2, 1, 1", tiles: []string{"/obj/table,\n/turf/wall,\n/area/room"}, requiredMap: "map_files/station/station.dmm"},
+		// same filename, different map, like Oshan's station and trench
+		testTemplate{name: "theirs", coords: "3, 1, 1", tiles: []string{"/obj/lamp,\n/turf/carpet,\n/area/office"}, requiredMap: "map_files/other/station.dmm"},
+	).open(t)
+
+	assert.Empty(t, layer.Warnings)
+	require.Len(t, layer.Templates, 1)
+	assert.Equal(t, "ours", layer.Templates[0].Name)
 }
 
 func TestLoad_SkipsTemplateOffTheMap(t *testing.T) {

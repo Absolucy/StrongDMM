@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"strings"
 
+	"sdmm/internal/dmapi/dmmap"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -113,6 +115,38 @@ func (c *Config) Entry(name string) *Entry {
 		}
 	}
 	return nil
+}
+
+// Monkestation's required_map is the path under _maps/, since some maps share a filename
+// (Oshan station and trench are both Oshan.dmm). Older configs only have the filename.
+func (e *Entry) wants(dmm *dmmap.Dmm) bool {
+	if strings.Contains(e.RequiredMap, "/") {
+		return strings.EqualFold(e.RequiredMap, mapsPath(dmm))
+	}
+	return strings.EqualFold(e.RequiredMap, dmm.Name)
+}
+
+// requiredMapOf is what a new entry for dmm should say, in whichever form the config already uses.
+func (c *Config) requiredMapOf(dmm *dmmap.Dmm) string {
+	p := mapsPath(dmm)
+	if p == "" {
+		return dmm.Name
+	}
+	for _, e := range c.Entries {
+		if strings.Contains(e.RequiredMap, "/") {
+			return p
+		}
+	}
+	return dmm.Name
+}
+
+// mapsPath is dmm's path under _maps/, or "" if it lives somewhere else.
+func mapsPath(dmm *dmmap.Dmm) string {
+	rel, ok := strings.CutPrefix(filepath.ToSlash(dmm.Path.Readable), "_maps/")
+	if !ok {
+		return ""
+	}
+	return rel
 }
 
 // TemplatePath is where the entry's (first) map file lives on disk.

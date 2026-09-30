@@ -119,6 +119,24 @@ func TestSave_NewTemplateFromEdit(t *testing.T) {
 	assert.Equal(t, stationTile, tilePaths(station, 5), "the station gets its disk version back under the new template")
 }
 
+func TestSave_NewTemplateUsesFullPathRequiredMap(t *testing.T) {
+	p := newTestProjectAt(t, "_maps/map_files/station/station.dmm",
+		testTemplate{name: "existing", coords: "1, 1, 1", tiles: []string{"/obj/table,\n/turf/wall,\n/area/room"}, requiredMap: "map_files/station/station.dmm"},
+	)
+	dmm, layer := p.open(t)
+
+	addLamp(dmm, 5)
+	_, _, err := layer.NewTemplate("station_edit", "Station", dmm.Name, 1, []util.Point{{X: 5, Y: 1, Z: 1}})
+	require.NoError(t, err)
+	require.NoError(t, saveLayer(p, layer, dmm))
+
+	cfg, err := FindConfig(p.root)
+	require.NoError(t, err)
+	entry := cfg.Entry("station_edit")
+	require.NotNil(t, entry)
+	assert.Equal(t, "map_files/station/station.dmm", entry.RequiredMap)
+}
+
 func TestSave_EmptiedTemplateIsDeleted(t *testing.T) {
 	p := newTestProject(t, editTemplate())
 	dmm, layer := p.open(t)
