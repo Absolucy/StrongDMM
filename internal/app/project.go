@@ -15,7 +15,6 @@ import (
 	"sdmm/internal/dmapi/dm"
 	"sdmm/internal/imguiext/style"
 	w "sdmm/internal/imguiext/widget"
-	"sdmm/internal/util/slice"
 
 	"sdmm/internal/dmapi/automap"
 	"sdmm/internal/dmapi/dmenv"
@@ -96,6 +95,15 @@ func findEnvironmentFileFromBase(path string) (string, error) {
 
 		path = filepath.Dir(path)
 	}
+}
+
+func isInsideDir(dir, path string) bool {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	rel, err := filepath.Rel(dir, abs)
+	return err == nil && filepath.IsLocal(rel)
 }
 
 func (a *app) loadEnvironment(path string) {
@@ -219,7 +227,7 @@ func (a *app) loadMap(path string, workspace *workspace.Workspace) {
 	log.Printf("map [%s] parsed in [%d] ms", path, elapsed)
 
 	// Add map to the recent only if it is a part of the currently opened environment.
-	if slice.StrContains(a.AvailableMaps(), path) {
+	if isInsideDir(a.loadedEnvironment.RootDir, path) {
 		log.Print("adding map path to the recent:", path)
 		cfg := a.projectConfig()
 		cfg.AddMap(path)

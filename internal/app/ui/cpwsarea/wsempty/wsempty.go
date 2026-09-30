@@ -317,7 +317,11 @@ func (ws *WsEmpty) selectMapRange(mapPath string) {
 	ws.dropSelectedMaps()
 	ws.addMapSelection(firstSelectedMap) // To ensure that we will always select maps from the ever first selection.
 	for idx := startIdx; idx <= endIdx; idx++ {
-		ws.addMapSelection(ws.availableMaps[idx])
+		availableMap := ws.availableMaps[idx]
+		if !strings.Contains(strings.ToLower(availableMap), strings.ToLower(filter)) {
+			continue
+		}
+		ws.addMapSelection(availableMap)
 	}
 }
 

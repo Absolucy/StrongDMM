@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
@@ -101,7 +101,7 @@ func (a *app) AvailableMaps() (availableMaps []string) {
 		return availableMaps
 	}
 
-	err := filepath.Walk(a.LoadedEnvironment().RootDir, func(path string, f os.FileInfo, err error) error {
+	err := filepath.WalkDir(a.LoadedEnvironment().RootDir, func(path string, d fs.DirEntry, err error) error {
 		if filepath.Ext(path) == ".dmm" {
 			availableMaps = append(availableMaps, path)
 		}
