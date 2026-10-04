@@ -6,6 +6,7 @@ import (
 	"sdmm/internal/app/render"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/canvas"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/editor"
+	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/pdecal"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/pquickedit"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/psettings"
 	"sdmm/internal/app/ui/cpwsarea/wsmap/pmap/tilemenu"
@@ -27,6 +28,7 @@ import (
 
 type App interface {
 	tilemenu.App
+	pdecal.App
 	pquickedit.App
 	psettings.App
 
@@ -87,6 +89,7 @@ type PaneMap struct {
 
 	tileMenu *tilemenu.TileMenu
 
+	pDecal     *pdecal.Panel
 	pQuickEdit *pquickedit.Panel
 	pSettings  *psettings.Panel
 
@@ -189,6 +192,7 @@ func New(app App, dmm *dmmap.Dmm, layer *automap.Layer) *PaneMap {
 
 	p.tileMenu = tilemenu.New(app, p.editor)
 
+	p.pDecal = pdecal.New(app)
 	p.pQuickEdit = pquickedit.New(app, p.editor)
 	p.pSettings = psettings.New(app, p.editor, layer)
 	// the panel lives behind the settings gear, which is too easy to miss when there's something in it
@@ -244,7 +248,9 @@ func (p *PaneMap) Process() {
 	p.tileMenu.Process()
 
 	p.showCanvas()
+	p.showDecalPreview()
 	p.showPanel("canvasTool_"+p.dmm.Name, pPosTop, p.showToolsPanel)
+	p.showPanelV("decal_"+p.dmm.Name, pPosLeftTop, p.active && tools.IsSelected(tools.TNDecal), p.pDecal.Process)
 	p.showPanelV("settings_"+p.dmm.Name, pPosRightTop, p.showSettings, p.pSettings.Process)
 	p.showPanelV(
 		"quickEdit_"+p.dmm.Name,

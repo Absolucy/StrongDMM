@@ -46,6 +46,14 @@ func (p *PaneMap) processCanvasOverlayTools() {
 		} else {
 			colTileFill = overlay.ColorToolFillAltTileFill
 		}
+	case tools.TNDecal:
+		if !tools.Selected().AltBehaviour() {
+			colTileFill = overlay.ColorToolAddTileFill
+			colTileBorder = overlay.ColorToolAddTileBorder
+		} else {
+			colTileFill = overlay.ColorToolDeleteAltTileFill
+			colTileBorder = overlay.ColorToolDeleteAltTileBorder
+		}
 	case tools.TNGrab:
 		colTileBorder = overlay.ColorToolSelectTileBorder
 	case tools.TNPick:

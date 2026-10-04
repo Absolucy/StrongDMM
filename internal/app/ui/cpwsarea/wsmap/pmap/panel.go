@@ -16,6 +16,7 @@ type panelPos int
 
 const (
 	pPosTop panelPos = iota
+	pPosLeftTop
 	pPosRightTop
 	pPosRightBottom
 	pPosBottom
@@ -36,6 +37,8 @@ func (p *PaneMap) showPanelV(id string, panelPos panelPos, visible bool, content
 	case pPosTop:
 		pos = p.pos.Plus(imgui.Vec2{X: panelPadding, Y: panelPadding})
 		size = imgui.Vec2{X: p.size.X - panelPadding*2}
+	case pPosLeftTop:
+		pos = p.pos.Plus(imgui.Vec2{X: panelPadding, Y: p.panelTopSize.Y + panelPadding*2})
 	case pPosRightTop:
 		x := imgui.ContentRegionAvail().X - p.panelRightTopSize.X - panelPadding
 		y := p.panelBottomSize.Y + panelPadding*2
@@ -66,6 +69,7 @@ func (p *PaneMap) showPanelV(id string, panelPos panelPos, visible bool, content
 		switch panelPos {
 		case pPosTop:
 			p.panelTopSize = imgui.WindowSize()
+		case pPosLeftTop:
 		case pPosRightTop:
 			p.panelRightTopSize = imgui.WindowSize()
 		case pPosRightBottom:

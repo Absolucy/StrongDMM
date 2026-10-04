@@ -36,6 +36,15 @@ func (s *prefabStorage) Initial(path string) *dmmprefab.Prefab {
 	return s.Get(path, dmvars.FromParent(environment.Objects[path].Vars))
 }
 
+// InitialV is the same as Initial, but for a path which the environment may not have.
+func (s *prefabStorage) InitialV(path string) (*dmmprefab.Prefab, bool) {
+	object, ok := environment.Objects[path]
+	if !ok {
+		return nil, false
+	}
+	return s.Get(path, dmvars.FromParent(object.Vars)), true
+}
+
 // Get returns a prefab for the provided path and variables.
 func (s *prefabStorage) Get(path string, vars *dmvars.Variables) *dmmprefab.Prefab {
 	p, _ := s.GetV(path, vars)

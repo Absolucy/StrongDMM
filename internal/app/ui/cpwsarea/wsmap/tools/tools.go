@@ -19,6 +19,7 @@ const (
 	TNFill    = "Fill"
 	TNGrab    = "Grab"
 	TNMove    = "Move"
+	TNDecal   = "Decal"
 	TNPick    = "Pick"
 	TNDelete  = "Delete"
 	TNReplace = "Replace"
@@ -38,6 +39,8 @@ type canvasState interface {
 	HoverOutOfBounds() bool
 	HoveredTile() util.Point
 	LastHoveredTile() util.Point
+	RelMouseX() int
+	RelMouseY() int
 }
 
 type editor interface {
@@ -78,6 +81,7 @@ var (
 		TNFill:    newFill(),
 		TNGrab:    newGrab(),
 		TNMove:    newMove(),
+		TNDecal:   newDecal(),
 		TNPick:    newPick(),
 		TNDelete:  newDelete(),
 		TNReplace: newReplace(),

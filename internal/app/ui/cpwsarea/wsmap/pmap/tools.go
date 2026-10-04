@@ -40,6 +40,11 @@ func processTempToolsMode() {
 }
 
 func processTempToolMode(key, altKey int, modeName string) bool {
+	// Typing "red" into the decal search would otherwise switch to the replace tool, and hide the search with it.
+	if imgui.CurrentIO().WantTextInput() {
+		return false
+	}
+
 	// Ignore presses when Dear ImGui inputs are in charge or actual shortcuts are invisible.
 	{
 		var p *PaneMap
@@ -88,4 +93,17 @@ func selectSelectTool() {
 
 func selectMoveTool() {
 	tools.SetSelected(tools.TNMove)
+}
+
+func selectDecalTool() {
+	tools.SetSelected(tools.TNDecal)
+}
+
+func (p *PaneMap) doRotateDecal() {
+	if !tools.IsSelected(tools.TNDecal) {
+		return
+	}
+	if prefab, ok := p.app.SelectedPrefab(); ok {
+		p.app.DoSelectPrefab(tools.RotatedPrefab(prefab))
+	}
 }
